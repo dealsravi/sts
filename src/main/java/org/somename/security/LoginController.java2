@@ -1,0 +1,71 @@
+package org.somename.security;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.rainbow.data.DataOperations;
+import org.rainbow.domain.person.Person;
+import org.rainbow.domain.security.Credentials;
+import org.rainbow.domain.security.User;
+import org.rainbow.helper.data.MockDataHelper;
+import org.somename.data.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+@Controller
+public class LoginController {
+
+	@Autowired
+	private PersonRepository pRepo;
+
+	/*
+	 * private static LoginController singleInst = null; DataOperations dao =
+	 * DataOperations.getInstance(); private LoginController() { } public static
+	 * LoginController getInstance() { if(singleInst==null) { singleInst = new
+	 * LoginController(); } return singleInst; }
+	 */
+    public boolean doLogin(String userLogin, String pw) {
+
+        String encodedPw = new String(Base64.encode(pw.getBytes()));
+        User u = dao.getAllUsersByLogin().get(userLogin);
+        if(u!=null) {
+            Person p = dao.getAllPersons().get(u.getIdPerson());
+            if(p!=null) {
+                if(dao.getAllCreds()!=null) {
+                    return dao.getAllCreds().get(userLogin).equals(encodedPw);
+                }
+
+            }
+        }
+
+        return false;
+
+    }
+
+    public User processLogin(String userLogin, String pw) {
+
+        if(StringUtils.isEmpty(userLogin) || StringUtils.isEmpty(pw))
+            return null;
+        String encodedPw = new String(Base64.encode(pw.getBytes()));
+        User u = dao.getAllUsersByLogin().get(userLogin);
+        if(u!=null) {
+            Person p = dao.getAllPersons().get(u.getIdPerson());
+            if(p!=null) {
+                if(dao.getAllCreds()!=null) {
+                    //return dao.getAllCreds().get(userLogin).equals(encodedPw);
+                    if(dao.getAllCreds().get(userLogin).equals(encodedPw)) {
+                        return u;
+                    }  else {
+                        return null;
+                    }
+                }
+
+            }
+        }
+
+        return null;
+
+    }
+}
